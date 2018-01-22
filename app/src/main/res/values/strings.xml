@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Filmes Famosos</string>
+    <string name="the_movie_db_api_key">04f9a07ce56929f108d2b0a091df5bbe</string>
+    <string name="filmes_populares">Populares</string>
+    <string name="filmes_melhores_avaliados">Melhores Avaliados</string>
+    <string name="error_message">Ops! Cannot load movies… check your connection and try again</string>
+    <string name="movie_title">Titulo do filme</string>
+    <string name="more_info">More Info</string>
+    <string name="vote_average">Vote Average:</string>
+    <string name="release_date">Release Date:</string>
+    <string name="contentForPoster">MoviePoster</string>
+    <string name="trailers">Trailers</string>
+    <string name="title_activity_trailers">TrailersActivity</string>
+</resources>
