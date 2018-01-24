@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.OnI
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         //call the method to initialize my views
         initViews();
     }
@@ -68,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.OnI
 
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(gridManager);
+
 
         //Call the method to load popular movies
         loadPopularMovies();

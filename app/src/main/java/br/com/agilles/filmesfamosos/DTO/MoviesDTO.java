@@ -17,6 +17,10 @@ public class MoviesDTO {
     @JsonProperty("results")
     private List<Movie> movies = new ArrayList<>();
 
+    @JsonProperty("total_pages")
+    private int totalPages;
+
+
     public List<Movie> getMovies() {
         return movies;
     }

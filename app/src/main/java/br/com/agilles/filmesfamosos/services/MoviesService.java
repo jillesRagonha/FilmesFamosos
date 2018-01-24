@@ -17,6 +17,4 @@ public interface MoviesService {
     @GET("top_rated")
     Call<MoviesDTO> retriveTopRatedMovies(@Query("api_key")String apiKey);
 
-    @GET("movie/{id}/videos")
-    Call<MoviesDTO> getMovieTrailers(@Path("id") int id, @Query("api_key") String apiKey);
 }

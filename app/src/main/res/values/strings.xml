@@ -11,4 +11,7 @@
     <string name="contentForPoster">MoviePoster</string>
     <string name="trailers">Trailers</string>
     <string name="title_activity_trailers">TrailersActivity</string>
+    <string name="reviews">Reviews</string>
+    <string name="autor_name">Autor Name</string>
+    <string name="review_text">Review</string>
 </resources>
