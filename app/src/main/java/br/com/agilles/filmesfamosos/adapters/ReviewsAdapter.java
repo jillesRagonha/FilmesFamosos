@@ -18,9 +18,9 @@ import br.com.agilles.filmesfamosos.models.Review;
 
 public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewsViewHolder> {
 
-    private OnItemClicked onClick;
+    private OnReviewClicked onClick;
 
-    public interface OnItemClicked {
+    public interface OnReviewClicked {
         void onItemClick(int position);
     }
 
@@ -69,7 +69,7 @@ public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewsV
         }
     }
 
-    public void setOnClick(OnItemClicked onClick) {
+    public void setOnClick(OnReviewClicked onClick) {
         this.onClick = onClick;
     }
 

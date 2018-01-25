@@ -25,6 +25,23 @@ public class Movie implements Serializable {
     @JsonProperty("poster_path")
     private String posterPath;
     private String overview;
+    private boolean favorite = false;
+
+    public boolean isFavorite() {
+        return favorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        this.favorite = favorite;
+    }
+
+    public List<Trailer> getTrailers() {
+        return trailers;
+    }
+
+    public void setTrailers(List<Trailer> trailers) {
+        this.trailers = trailers;
+    }
 
     private List<Trailer> trailers;
 

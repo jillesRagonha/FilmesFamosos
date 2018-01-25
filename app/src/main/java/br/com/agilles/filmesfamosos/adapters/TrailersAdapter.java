@@ -20,9 +20,9 @@ import br.com.agilles.filmesfamosos.models.Trailer;
  */
 
 public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.TrailerViewHolder> {
-    private OnItemClicked onClick;
+    private OnTrailerClicked onClick;
 
-    public interface OnItemClicked {
+    public interface OnTrailerClicked {
         void onItemClick(int position);
     }
 
@@ -75,7 +75,7 @@ public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.Traile
             this.mTrailerCoverImageView = itemView.findViewById(R.id.iv_trailer_cover);
         }
     }
-    public void setOnClick(OnItemClicked onClick) {
+    public void setOnClick(OnTrailerClicked onClick) {
         this.onClick = onClick;
     }
 

@@ -37,20 +37,26 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.OnI
     private TextView mErrorMessageTextView;
     private final Activity activity = MainActivity.this;
     private MoviesAdapter mMoviesAdapter;
+    private static final String MOVIE_LIST_CHOICE = "Movie List Choice";
+    private int listMovieId;
+    private static final int POP_MOVIES = 1;
+    private static final int TOP_MOVIES = 2;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        if (savedInstanceState != null) {
+            this.listMovieId = savedInstanceState.getInt(MOVIE_LIST_CHOICE);
+        }
 
         //call the method to initialize my views
         initViews();
     }
 
     /**
-     * Initialize views
+     * Inicializa as views
      */
     private void initViews() {
 
@@ -70,15 +76,29 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.OnI
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(gridManager);
 
+        if (listMovieId != 0) {
+            switch (listMovieId) {
+                case POP_MOVIES:
+                    loadPopularMovies();
+                    break;
+                case TOP_MOVIES:
+                    loadTopRatedMovies();
+                    break;
+                default:
+                    loadTopRatedMovies();
+            }
+        } else {
+            loadPopularMovies();
 
-        //Call the method to load popular movies
-        loadPopularMovies();
+        }
+
     }
 
     /**
      * Load Popular Movies Using Retrofit
      */
     private void loadPopularMovies() {
+        listMovieId = POP_MOVIES;
         showProgressBar();
 
         Call<MoviesDTO> call = new RetrofitStarter().getMovieService().retrievePopularMovies(getString(R.string.the_movie_db_api_key));
@@ -129,6 +149,8 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.OnI
     }
 
     private void loadTopRatedMovies() {
+        listMovieId = TOP_MOVIES;
+
         showProgressBar();
         Call<MoviesDTO> call = new RetrofitStarter().getMovieService().retriveTopRatedMovies(getString(R.string.the_movie_db_api_key));
 
@@ -166,8 +188,14 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.OnI
             case R.id.mi_melhor_avaliado:
                 loadTopRatedMovies();
                 break;
+            case R.id.mi_favorite:
+                loadFavoriteMovies();
+                break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void loadFavoriteMovies() {
     }
 
 
@@ -180,19 +208,26 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.OnI
     }
 
     private void addMoviesToList(Response<MoviesDTO> response) {
+
         MoviesDTO moviesDTO = response.body();
         movies = new ArrayList<>();
 
+
         movies.addAll(moviesDTO.getMovies());
+
 
         initAdapter(movies);
     }
 
-//TODO 1 - Criar activity para trailers --
-//TODO 2 - Puxar trailers da api --
-//TODO 3 - executar os trailers --
-//TODO 4 - Criar parte de criticas--
-//TODO 5 - Puxar criticas da api--
-//TODO 6 - Exibir criticas--
+    /**
+     * salvar estado da activity
+     * @param outState
+     */
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt(MOVIE_LIST_CHOICE, listMovieId);
+        super.onSaveInstanceState(outState);
+    }
+
 
 }
