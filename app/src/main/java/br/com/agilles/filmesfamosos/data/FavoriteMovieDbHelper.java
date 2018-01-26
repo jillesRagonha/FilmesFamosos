@@ -110,7 +110,9 @@ public class FavoriteMovieDbHelper extends SQLiteOpenHelper {
         List<Movie> movieList = new ArrayList<>();
         while (c.moveToNext()) {
             Movie movie = new Movie();
-            int favorite = c.getColumnIndex(DBContract.FavoriteMoviesEntry.COLUMN_NAME_FAVORITE);
+            int favorite = c.getInt(c.getColumnIndex(DBContract.FavoriteMoviesEntry.COLUMN_NAME_FAVORITE));
+            movie.setId(c.getLong(c.getColumnIndex(DBContract.FavoriteMoviesEntry.COLUMN_NAME_KEY)));
+
             if (favorite == 1) {
                 movie.setFavorite(true);
             }

@@ -3,6 +3,7 @@ package br.com.agilles.filmesfamosos.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -22,6 +23,7 @@ import java.util.List;
 import br.com.agilles.filmesfamosos.DTO.MoviesDTO;
 import br.com.agilles.filmesfamosos.R;
 import br.com.agilles.filmesfamosos.adapters.MoviesAdapter;
+import br.com.agilles.filmesfamosos.data.FavoriteMovieDbHelper;
 import br.com.agilles.filmesfamosos.models.Movie;
 import br.com.agilles.filmesfamosos.retrofit.RetrofitStarter;
 import retrofit2.Call;
@@ -196,6 +198,31 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.OnI
     }
 
     private void loadFavoriteMovies() {
+        List<Movie> movies = new ArrayList<>();
+
+        showProgressBar();
+        FavoriteMovieDbHelper dbHelper = new FavoriteMovieDbHelper(this);
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        List<Movie> favoriteMoviesList = dbHelper.allMoviesList();
+        for (Movie m : favoriteMoviesList) {
+            Call<Movie> call = new RetrofitStarter().getMovieService().getFavoriteMovieDetail(m.getId(), getString(R.string.the_movie_db_api_key));
+            call.enqueue(new Callback<Movie>() {
+                @Override
+                public void onResponse(Call<Movie> call, Response<Movie> response) {
+                    movies.add(response.body());
+                    initAdapter(movies);
+                    hideProgressBar();
+                }
+
+                @Override
+                public void onFailure(Call<Movie> call, Throwable t) {
+
+                }
+            });
+        }
+
+
+
     }
 
 
@@ -208,19 +235,16 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.OnI
     }
 
     private void addMoviesToList(Response<MoviesDTO> response) {
-
         MoviesDTO moviesDTO = response.body();
         movies = new ArrayList<>();
-
-
         movies.addAll(moviesDTO.getMovies());
-
 
         initAdapter(movies);
     }
 
     /**
      * salvar estado da activity
+     *
      * @param outState
      */
     @Override

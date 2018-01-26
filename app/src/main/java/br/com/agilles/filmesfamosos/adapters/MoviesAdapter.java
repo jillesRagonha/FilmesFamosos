@@ -72,13 +72,9 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesView
             super(view);
             mPosterMovieImageView = view.findViewById(R.id.iv_movies_poster);
         }
-
-
     }
 
     public void setOnClick(OnItemClicked onClick) {
         this.onClick = onClick;
     }
-
-
 }
