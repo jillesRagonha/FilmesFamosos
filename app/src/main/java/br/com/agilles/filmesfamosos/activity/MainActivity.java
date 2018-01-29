@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.OnI
     }
 
     /**
-     * Inicializa as views
+     * Inicializando as views
      */
     private void initViews() {
         mFavoriteMoviesAdapter = new FavoriteMoviesAdapter(this, favoriteMovies);
