@@ -95,7 +95,7 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailersAd
     public void favoriteMovie(View view) {
         if (mFavoriteToggleButton.isChecked()) {
             Toast.makeText(getApplicationContext(),
-                    movie.getTitle() + " - Add to favorite!", Toast.LENGTH_SHORT).show();
+                    movie.getTitle() + getString(R.string.add_favorite), Toast.LENGTH_SHORT).show();
             movie.setFavorite(true);
             ContentValues values = new ContentValues();
             values.put(DBContract.FavoriteMoviesEntry.COLUMN_NAME_KEY, movie.getId());
@@ -125,7 +125,7 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailersAd
         mTitleMovieTextView.setText(movie.getTitle());
         mMovieOverviewTextView.setText(movie.getOverview());
         mVoteAverageRatingBar.setRating(movie.getVoteAverage());
-        mVoteAverageTextView.setText("Vote Average: (" + movie.getVoteAverage() + " )");
+        mVoteAverageTextView.setText(getString(R.string.vote_average_title) + movie.getVoteAverage() + " )");
         mMovieReleaseDateTextView.setText((movie.getReleaseDate()));
 
         Picasso

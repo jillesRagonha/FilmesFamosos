@@ -164,8 +164,6 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.OnI
     }
 
 
-
-
     private void initAdapter(List<Movie> movies) {
         if (!mRecyclerView.isShown()) {
             mRecyclerView.setVisibility(View.VISIBLE);

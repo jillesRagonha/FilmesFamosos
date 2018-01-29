@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Filmes Famosos</string>
-    <string name="the_movie_db_api_key">04f9a07ce56929f108d2b0a091df5bbe</string>
+    <string name="the_movie_db_api_key"> <!-- TODO insert api Key here --></string>
     <string name="filmes_populares">Populares</string>
     <string name="filmes_melhores_avaliados">Melhores Avaliados</string>
     <string name="error_message">Ops! Cannot load movies… check your connection and try again</string>
@@ -15,4 +15,6 @@
     <string name="autor_name">Autor Name</string>
     <string name="review_text">Review</string>
     <string name="favorite_movies">Favoritos</string>
+    <string name="add_favorite">- Add to favorite!</string>
+    <string name="vote_average_title">Vote Average: (</string>
 </resources>
