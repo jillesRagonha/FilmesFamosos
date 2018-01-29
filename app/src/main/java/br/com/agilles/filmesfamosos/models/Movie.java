@@ -26,6 +26,7 @@ public class Movie implements Serializable {
     private String posterPath;
     private String overview;
     private boolean favorite = false;
+    private String finalPosterPath;
 
     public boolean isFavorite() {
         return favorite;
@@ -57,7 +58,7 @@ public class Movie implements Serializable {
     }
 
     public String getPosterPath() {
-        return IMAGE_BASE_PATH + IMAGE_BASE_PATH_SIZE + posterPath;
+        return posterPath;
     }
 
     public String getOverview() {
@@ -119,4 +120,16 @@ public class Movie implements Serializable {
     public void setVoteAverage(float voteAverage) {
         this.voteAverage = voteAverage;
     }
+
+    public String getFinalPosterPath() {
+        return IMAGE_BASE_PATH + IMAGE_BASE_PATH_SIZE + posterPath;
+    }
+
+    public void setFinalPosterPath(String finalPosterPath) {
+        this.finalPosterPath = finalPosterPath;
+    }
+
+
+
 }
+

@@ -3,8 +3,12 @@ package br.com.agilles.filmesfamosos.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.database.sqlite.SQLiteDatabase;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -22,27 +26,33 @@ import java.util.List;
 
 import br.com.agilles.filmesfamosos.DTO.MoviesDTO;
 import br.com.agilles.filmesfamosos.R;
+import br.com.agilles.filmesfamosos.adapters.FavoriteMoviesAdapter;
 import br.com.agilles.filmesfamosos.adapters.MoviesAdapter;
-import br.com.agilles.filmesfamosos.data.FavoriteMovieDbHelper;
+import br.com.agilles.filmesfamosos.data.contract.ContentProviderContract;
+import br.com.agilles.filmesfamosos.data.contract.DBContract;
 import br.com.agilles.filmesfamosos.models.Movie;
 import br.com.agilles.filmesfamosos.retrofit.RetrofitStarter;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity implements MoviesAdapter.OnItemClicked {
+public class MainActivity extends AppCompatActivity implements MoviesAdapter.OnItemClicked, FavoriteMoviesAdapter.OnItemClicked, LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private RecyclerView mRecyclerView;
     private List<Movie> movies = new ArrayList<>();
+    private List<Movie> favoriteMovies = new ArrayList<>();
     private ProgressBar mLoadingProgressBar;
     private TextView mErrorMessageTextView;
     private final Activity activity = MainActivity.this;
     private MoviesAdapter mMoviesAdapter;
+    private FavoriteMoviesAdapter mFavoriteMoviesAdapter;
     private static final String MOVIE_LIST_CHOICE = "Movie List Choice";
     private int listMovieId;
     private static final int POP_MOVIES = 1;
     private static final int TOP_MOVIES = 2;
+    private static final int FAVORITE_MOVIES = 3;
+    private static final int MOVIE_LOADER_ID = 0;
 
 
     @Override
@@ -52,19 +62,29 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.OnI
         if (savedInstanceState != null) {
             this.listMovieId = savedInstanceState.getInt(MOVIE_LIST_CHOICE);
         }
-
         //call the method to initialize my views
+
         initViews();
+
+        getSupportLoaderManager().initLoader(MOVIE_LOADER_ID, null, this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID, null, this);
     }
 
     /**
      * Inicializa as views
      */
     private void initViews() {
-
+        mFavoriteMoviesAdapter = new FavoriteMoviesAdapter(this, favoriteMovies);
         mRecyclerView = (RecyclerView) findViewById(R.id.rv_lista_filmes);
         mLoadingProgressBar = (ProgressBar) findViewById(R.id.pb_loading);
         mErrorMessageTextView = (TextView) findViewById(R.id.tv_error_message);
+        mFavoriteMoviesAdapter = new FavoriteMoviesAdapter(this, favoriteMovies);
+
 
         //Change layout according device orientation
         GridLayoutManager gridManager;
@@ -78,6 +98,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.OnI
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(gridManager);
 
+
         if (listMovieId != 0) {
             switch (listMovieId) {
                 case POP_MOVIES:
@@ -86,12 +107,14 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.OnI
                 case TOP_MOVIES:
                     loadTopRatedMovies();
                     break;
+                case FAVORITE_MOVIES:
+                    loadFavoriteMovies();
+                    break;
                 default:
                     loadTopRatedMovies();
             }
         } else {
             loadPopularMovies();
-
         }
 
     }
@@ -117,6 +140,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.OnI
                 Log.e(TAG, "error loading popular movies: " + t.getMessage());
                 showErrorMessage();
             }
+
         });
 
     }
@@ -138,6 +162,8 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.OnI
     private void hideProgressBar() {
         mLoadingProgressBar.setVisibility(View.INVISIBLE);
     }
+
+
 
 
     private void initAdapter(List<Movie> movies) {
@@ -172,6 +198,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.OnI
 
     }
 
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
@@ -198,31 +225,13 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.OnI
     }
 
     private void loadFavoriteMovies() {
-        List<Movie> movies = new ArrayList<>();
+        listMovieId = FAVORITE_MOVIES;
 
         showProgressBar();
-        FavoriteMovieDbHelper dbHelper = new FavoriteMovieDbHelper(this);
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        List<Movie> favoriteMoviesList = dbHelper.allMoviesList();
-        for (Movie m : favoriteMoviesList) {
-            Call<Movie> call = new RetrofitStarter().getMovieService().getFavoriteMovieDetail(m.getId(), getString(R.string.the_movie_db_api_key));
-            call.enqueue(new Callback<Movie>() {
-                @Override
-                public void onResponse(Call<Movie> call, Response<Movie> response) {
-                    movies.add(response.body());
-                    initAdapter(movies);
-                    hideProgressBar();
-                }
 
-                @Override
-                public void onFailure(Call<Movie> call, Throwable t) {
-
-                }
-            });
-        }
-
-
-
+        mFavoriteMoviesAdapter.setOnCLick(this);
+        mRecyclerView.setAdapter(mFavoriteMoviesAdapter);
+        hideProgressBar();
     }
 
 
@@ -231,7 +240,19 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.OnI
         Movie movie = movies.get(position);
         Intent intentSelectedMovieDetail = new Intent(this, MovieDetailActivity.class);
         intentSelectedMovieDetail.putExtra("selectedMovie", movie);
+        intentSelectedMovieDetail.putExtra("posterPath", movie.getFinalPosterPath());
+
         startActivity(intentSelectedMovieDetail);
+    }
+
+    @Override
+    public void onItemClicked(int position) {
+        Movie movie = favoriteMovies.get(position);
+        Intent intentSelectedMovieDetail = new Intent(this, MovieDetailActivity.class);
+        intentSelectedMovieDetail.putExtra("selectedMovie", movie);
+        intentSelectedMovieDetail.putExtra("posterPath", movie.getPosterPath());
+        startActivity(intentSelectedMovieDetail);
+
     }
 
     private void addMoviesToList(Response<MoviesDTO> response) {
@@ -254,4 +275,69 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.OnI
     }
 
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
+        return new AsyncTaskLoader<Cursor>(this) {
+            Cursor mMovieData = null;
+
+            @Override
+            protected void onStartLoading() {
+                if (mMovieData != null) {
+                    deliverResult(mMovieData);
+                } else {
+                    forceLoad();
+                }
+            }
+
+            @Nullable
+            @Override
+            public Cursor loadInBackground() {
+                try {
+                    return getContentResolver().query(ContentProviderContract.CONTENT_URI, null,
+                            null, null, DBContract.FavoriteMoviesEntry.COLUMN_NAME_TITLE);
+
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to asynchronously load data.");
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+
+            @Override
+            public void deliverResult(@Nullable Cursor data) {
+                mMovieData = data;
+                super.deliverResult(data);
+            }
+        };
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        favoriteMovies = new ArrayList<>();
+
+        while (data.moveToNext()) {
+            Movie movie = new Movie();
+            int favorite = data.getInt(data.getColumnIndex(DBContract.FavoriteMoviesEntry.COLUMN_NAME_FAVORITE));
+            movie.setId(data.getLong(data.getColumnIndex(DBContract.FavoriteMoviesEntry.COLUMN_NAME_KEY)));
+            movie.setTitle(data.getString(data.getColumnIndex(DBContract.FavoriteMoviesEntry.COLUMN_NAME_TITLE)));
+            movie.setOverview(data.getString(data.getColumnIndex(DBContract.FavoriteMoviesEntry.COLUMN_NAME_OVERVIEW)));
+            movie.setLanguage(data.getString(data.getColumnIndex(DBContract.FavoriteMoviesEntry.COLUMN_NAME_LANGUAGE)));
+            movie.setReleaseDate(data.getString(data.getColumnIndex(DBContract.FavoriteMoviesEntry.COLUMN_NAME_RELEASE_DATE)));
+            movie.setPosterPath(data.getString(data.getColumnIndex(DBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTERPATH)));
+            movie.setVoteAverage(data.getFloat(data.getColumnIndex(DBContract.FavoriteMoviesEntry.COLUMN_NAME_AVERAGE)));
+
+            if (favorite == 1) {
+                movie.setFavorite(true);
+            }
+            favoriteMovies.add(movie);
+        }
+        mFavoriteMoviesAdapter.swapCursor(data);
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mFavoriteMoviesAdapter.swapCursor(null);
+    }
 }

@@ -3,6 +3,7 @@
     package="br.com.agilles.filmesfamosos">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="br.com.agilles.filmesfamosos.TERMS_READ" />
 
     <application
         android:allowBackup="true"
@@ -19,6 +20,11 @@
             </intent-filter>
         </activity>
         <activity android:name=".activity.MovieDetailActivity" />
+
+        <provider
+            android:authorities="br.com.agilles.filmesfamosos"
+            android:name=".data.MoviesContentProvider"
+            android:exported="false" />
     </application>
 
 </manifest>

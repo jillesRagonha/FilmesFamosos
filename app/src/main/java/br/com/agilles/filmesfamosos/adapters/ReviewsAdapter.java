@@ -21,7 +21,7 @@ public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewsV
     private OnReviewClicked onClick;
 
     public interface OnReviewClicked {
-        void onItemClick(int position);
+        void onReviewClick(int position);
     }
 
     private List<Review> reviewsList;
@@ -49,7 +49,7 @@ public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewsV
         Review review = reviewsList.get(position);
         holder.mReviewAuthorTextView.setText(review.getAutorName());
         holder.mReviewContent.setText(review.getReview());
-        holder.mReviewContent.setOnClickListener(view -> onClick.onItemClick(holder.getAdapterPosition()));
+        holder.mReviewContent.setOnClickListener(view -> onClick.onReviewClick(holder.getAdapterPosition()));
     }
 
     @Override
@@ -69,7 +69,7 @@ public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewsV
         }
     }
 
-    public void setOnClick(OnReviewClicked onClick) {
+    public void setOnReviewClick(OnReviewClicked onClick) {
         this.onClick = onClick;
     }
 

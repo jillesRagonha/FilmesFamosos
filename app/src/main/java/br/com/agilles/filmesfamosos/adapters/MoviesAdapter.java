@@ -48,7 +48,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesView
     public void onBindViewHolder(MoviesViewHolder holder, int position) {
         position = holder.getAdapterPosition();
         Movie movie = moviesList.get(position);
-        String imagemUri = movie.getPosterPath();
+        String imagemUri = movie.getFinalPosterPath();
         Picasso
                 .with(context)
                 .load(imagemUri)

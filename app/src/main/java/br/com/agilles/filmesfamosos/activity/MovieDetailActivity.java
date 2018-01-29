@@ -1,9 +1,11 @@
 package br.com.agilles.filmesfamosos.activity;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -26,6 +28,8 @@ import br.com.agilles.filmesfamosos.R;
 import br.com.agilles.filmesfamosos.adapters.ReviewsAdapter;
 import br.com.agilles.filmesfamosos.adapters.TrailersAdapter;
 import br.com.agilles.filmesfamosos.data.FavoriteMovieDbHelper;
+import br.com.agilles.filmesfamosos.data.contract.ContentProviderContract;
+import br.com.agilles.filmesfamosos.data.contract.DBContract;
 import br.com.agilles.filmesfamosos.models.Movie;
 import br.com.agilles.filmesfamosos.models.Review;
 import br.com.agilles.filmesfamosos.models.Trailer;
@@ -56,6 +60,7 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailersAd
     private SQLiteDatabase mDb;
     FavoriteMovieDbHelper dbHelper;
     Movie movie;
+    private String posterPath;
 
 
     @Override
@@ -66,6 +71,7 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailersAd
         Intent intent = getIntent();
         movie = (Movie) intent.getSerializableExtra("selectedMovie");
         this.id = movie.getId();
+        posterPath = intent.getStringExtra("posterPath");
         dbHelper = new FavoriteMovieDbHelper(this);
         mDb = dbHelper.getWritableDatabase();
 
@@ -89,13 +95,22 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailersAd
     public void favoriteMovie(View view) {
         if (mFavoriteToggleButton.isChecked()) {
             Toast.makeText(getApplicationContext(),
-                    "Toggle is on", Toast.LENGTH_SHORT).show();
+                    movie.getTitle() + " - Add to favorite!", Toast.LENGTH_SHORT).show();
             movie.setFavorite(true);
-            dbHelper.insert(movie);
+            ContentValues values = new ContentValues();
+            values.put(DBContract.FavoriteMoviesEntry.COLUMN_NAME_KEY, movie.getId());
+            values.put(DBContract.FavoriteMoviesEntry.COLUMN_NAME_TITLE, movie.getTitle());
+            values.put(DBContract.FavoriteMoviesEntry.COLUMN_NAME_FAVORITE, movie.isFavorite());
+            values.put(DBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTERPATH, movie.getFinalPosterPath());
+            values.put(DBContract.FavoriteMoviesEntry.COLUMN_NAME_LANGUAGE, movie.getLanguage());
+            values.put(DBContract.FavoriteMoviesEntry.COLUMN_NAME_OVERVIEW, movie.getOverview());
+            values.put(DBContract.FavoriteMoviesEntry.COLUMN_NAME_RELEASE_DATE, movie.getReleaseDate());
+            values.put(DBContract.FavoriteMoviesEntry.COLUMN_NAME_AVERAGE, movie.getVoteAverage());
+            Uri uri = getContentResolver().insert(ContentProviderContract.CONTENT_URI, values);
 
         } else {
             Toast.makeText(getApplicationContext(),
-                    "Toggle is off", Toast.LENGTH_SHORT).show();
+                    "Movie removed from your favorites", Toast.LENGTH_SHORT).show();
             movie.setFavorite(false);
             dbHelper.remove(movie);
         }
@@ -111,12 +126,15 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailersAd
         mMovieOverviewTextView.setText(movie.getOverview());
         mVoteAverageRatingBar.setRating(movie.getVoteAverage());
         mVoteAverageTextView.setText("Vote Average: (" + movie.getVoteAverage() + " )");
-        mMovieReleaseDateTextView.setText(getDateConverted(movie.getReleaseDate()));
-        String imagemUri = movie.getPosterPath();
+        mMovieReleaseDateTextView.setText((movie.getReleaseDate()));
+
         Picasso
                 .with(this)
-                .load(imagemUri)
+                .load(posterPath)
                 .into(mMoviePosterDetailImageView);
+
+
+
     }
 
     /**
@@ -220,19 +238,8 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailersAd
         ReviewsDTO reviewsDTO = response.body();
         this.reviewsList.addAll(reviewsDTO.getReviews());
         reviewsAdapter = new ReviewsAdapter(reviewsList, MovieDetailActivity.this);
+        reviewsAdapter.setOnReviewClick(this);
         mRecyclerViewReviews.setAdapter(reviewsAdapter);
-    }
-
-
-    /**
-     * converte a data para padrão br
-     *
-     * @param date
-     * @return
-     */
-    private String getDateConverted(String date) {
-        date = date.replaceAll("-", "/");
-        return date;
     }
 
 
@@ -247,6 +254,24 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailersAd
         startActivity(openVideoOnYoutube);
     }
 
+    /**
+     * Abre o review inteiro para o usuário ler
+     *
+     * @param position
+     */
+    @Override
+    public void onReviewClick(int position) {
+        Review review = reviewsList.get(position);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setMessage(review.getReview())
+                .setTitle(review.getAutorName());
+
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
 }
 
 

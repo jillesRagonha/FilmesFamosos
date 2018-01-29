@@ -19,7 +19,7 @@ import br.com.agilles.filmesfamosos.models.Movie;
 
 public class FavoriteMovieDbHelper extends SQLiteOpenHelper {
     private final static String DATABASE_NAME = "favoriteMovies.db";
-    private final static int DATABASE_VERSION = 1;
+    private final static int DATABASE_VERSION = 3;
 
 
     public FavoriteMovieDbHelper(Context context) {
@@ -32,7 +32,12 @@ public class FavoriteMovieDbHelper extends SQLiteOpenHelper {
                 + " (" + DBContract.FavoriteMoviesEntry._ID + " INTEGER PRIMARY KEY, " +
                 DBContract.FavoriteMoviesEntry.COLUMN_NAME_KEY + " INTEGER NOT NULL, " +
                 DBContract.FavoriteMoviesEntry.COLUMN_NAME_TITLE + "  TEXT NOT NULL, " +
-                DBContract.FavoriteMoviesEntry.COLUMN_NAME_FAVORITE + " INTEGER NOT NULL);";
+                DBContract.FavoriteMoviesEntry.COLUMN_NAME_FAVORITE + " INTEGER NOT NULL, "+
+                DBContract.FavoriteMoviesEntry.COLUMN_NAME_LANGUAGE + " TEXT NOT NULL, "+
+                DBContract.FavoriteMoviesEntry.COLUMN_NAME_OVERVIEW + " TEXT NOT NULL, " +
+                DBContract.FavoriteMoviesEntry.COLUMN_NAME_POSTERPATH + " TEXT NOT NULL, " +
+                DBContract.FavoriteMoviesEntry.COLUMN_NAME_RELEASE_DATE + " TEXT NOT NULL, " +
+                DBContract.FavoriteMoviesEntry.COLUMN_NAME_AVERAGE +" REAL NOT NULL" +");";
         Log.v("SQLITE_MENSAGEM", createTableSQL);
         db.execSQL(createTableSQL);
 
